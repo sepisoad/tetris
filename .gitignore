@@ -1,0 +1,7 @@
+.vscode
+game
+game.exe
+obj/
+Makefile
+game.make
+pkg/
