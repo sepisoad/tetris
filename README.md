@@ -1,5 +1,6 @@
 # tetris
 a tetris clone written in C using SDL2
+
 ![alt text](screenshot1.png "in game screenshot")
 
 ## How to build
