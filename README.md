@@ -1,11 +1,11 @@
 # tetris
 a tetris clone written in C using SDL2
 
-![alt text](screenshots/1.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")
+![alt text](screenshots/1.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")![alt text](screenshots/3.png "in game screenshot")
 
 ## Where to get the game
 if you want you can download the pre-build and packaged version on itch.io
-<iframe frameborder="0" src="https://itch.io/embed/138834" width="552" height="167"></iframe>
+[Download](https://sepisoad.itch.io/tetrisk)
 
 
 ## How to build
