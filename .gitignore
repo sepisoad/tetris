@@ -1,7 +1,6 @@
-.vscode
+obj/
+pkg/
 game
 game.exe
-obj/
-Makefile
 game.make
-pkg/
+Makefile

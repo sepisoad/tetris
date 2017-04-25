@@ -1,0 +1,43 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "0.1.0",
+  "showOutput": "always",
+  "tasks": [
+    {
+      "taskName": "premake4",
+      "command": "premake4",
+      "args": [
+        "gmake"
+      ]
+    },
+    {
+      "taskName": "debug build",
+      "command": "make",
+      "isBuildCommand": true
+    },
+    {
+      "taskName": "release build",
+      "command": "make",
+      "args": [
+        "config=release"
+      ]
+    },
+    {
+      "taskName": "debug clean",
+      "command": "make",
+      "args": [
+        "config=debug",
+        "clean"
+      ]
+    },
+    {
+      "taskName": "release clean",
+      "command": "make",
+      "args": [
+        "config=release",
+        "clean"
+      ]
+    }
+  ]
+}

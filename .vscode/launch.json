@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/game.exe",
+      "miDebuggerPath": "C:/Users/sepisoad/Downloads/_apps_/msys64/mingw64/bin/gdb.exe"
+    }
+  ]
+}

@@ -1,13 +1,18 @@
 # tetris
 a tetris clone written in C using SDL2
 
-![alt text](screenshot1.png "in game screenshot")
+![alt text](screenshots/1.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")
+
+## Where to get the game
+if you want you can download the pre-build and packaged version on itch.io
+<iframe frameborder="0" src="https://itch.io/embed/138834" width="552" height="167"></iframe>
+
 
 ## How to build
 
 ### Prerequisite
 in order to build the game you need to first download [premake4](https://premake.github.io/download.html#v4)
-you also need to get [libSDL2](https://www.libsdl.org/) and [libSDL2_ttf](https://www.libsdl.org/projects/SDL_ttf/)
+you also need to get [libSDL2](https://www.libsdl.org/), [libSDL2_ttf](https://www.libsdl.org/projects/SDL_ttf/) and [SDL_mixer 2.0](https://www.libsdl.org/projects/SDL_mixer/)
 
 ### Build Instructions
 run following commands in your shell:

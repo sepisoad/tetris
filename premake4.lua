@@ -15,6 +15,11 @@ solution "test"
   configuration "Debug"
     defines { "DEBUG", "MEM_DEBUG" }
     flags { "Symbols", "ExtraWarnings" }
+    if os.get() == "windows" then
+      postbuildcommands {}
+    else
+      postbuildcommands {}
+    end
 
   configuration "Release"
     defines { "NDEBUG" }
