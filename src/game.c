@@ -15,28 +15,58 @@ extern cell_k board[BOARD_COLS][BOARD_ROWS];
 
 //==============================================================================
 
+static Mix_Music *music_intro = NULL;
+static Mix_Music *music_menue = NULL;
+static Mix_Music *music_one = NULL;
+static Mix_Chunk *sfx_item = NULL;
+static Mix_Chunk *sfx_select = NULL;
+static bool can_show_grids = true;
+static bool is_fullscreen = false;
+static bool mute_music = false;
+static bool mute_sfx = false;
+
+//==============================================================================
+
 void engine_init(engine_t *engine)
 {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
   TTF_Init();
-  engine->font = TTF_OpenFont("data/font.ttf", 16);
+
   engine->window = SDL_CreateWindow("tets",
                                     SDL_WINDOWPOS_UNDEFINED,
                                     SDL_WINDOWPOS_UNDEFINED,
                                     WINDOW_WIDTH,
                                     WINDOW_HEIGHT,
-                                    SDL_WINDOW_SHOWN);
+                                    SDL_WINDOW_OPENGL);
+
   engine->renderer = SDL_CreateRenderer(
       engine->window,
       -1,
-      SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+      SDL_RENDERER_ACCELERATED |
+          SDL_RENDERER_PRESENTVSYNC);
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+  SDL_RenderSetLogicalSize(engine->renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+
   Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 512);
+
+  engine->font = TTF_OpenFont("data/font.ttf", 16);
+
+  music_intro = Mix_LoadMUS(INTRO_OGG);
+  music_one = Mix_LoadMUS(MUSIC_ONE_OGG);
+  music_menue = Mix_LoadMUS(MUSIC_MENUE_OGG);
+  sfx_item = Mix_LoadWAV(MENUE_ITEM_OGG);
+  sfx_select = Mix_LoadWAV(MENUE_SELECT_OGG);
 }
 
 //==============================================================================
 
 void engine_uninit(engine_t *engine)
 {
+  Mix_FreeMusic(music_intro);
+  Mix_FreeMusic(music_one);
+  Mix_FreeMusic(music_menue);
+  Mix_FreeChunk(sfx_item);
+  Mix_FreeChunk(sfx_select);
   SDL_DestroyRenderer(engine->renderer);
   SDL_DestroyWindow(engine->window);
   TTF_CloseFont(engine->font);
@@ -51,9 +81,6 @@ void intro_start(engine_t *engine)
 {
   SDL_Surface *surface;
   SDL_Texture *texture;
-  Mix_Music *music_intro;
-
-  music_intro = Mix_LoadMUS(INTRO_OGG);
 
   surface = IMG_Load(INTRO_SHEET);
   if (!surface)
@@ -78,7 +105,6 @@ void intro_start(engine_t *engine)
   SDL_SetRenderDrawColor(engine->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
   SDL_RenderClear(engine->renderer);
   SDL_RenderPresent(engine->renderer);
-  // SDL_Delay(500);
   Mix_PlayMusic(music_intro, 0);
 
   for (int idx = 0; idx < frames_count; idx++)
@@ -98,7 +124,6 @@ void intro_start(engine_t *engine)
     SDL_RenderCopy(engine->renderer, texture, &rect, NULL);
     SDL_RenderPresent(engine->renderer);
   }
-  // SDL_Delay(1500);
 
   while (Mix_PlayingMusic())
     ;
@@ -109,30 +134,34 @@ void intro_start(engine_t *engine)
     json_value_free(jsv_root);
     jsv_root = NULL;
   }
-
-  Mix_FreeMusic(music_intro);
 }
 
 //==============================================================================
 
 bool main_menue_start(engine_t *engine)
 {
-
   SDL_Event event;
-  Mix_Chunk *sfx_item = Mix_LoadWAV(MENUE_ITEM_OGG);
-  ;
-  Mix_Chunk *sfx_select = Mix_LoadWAV(MENUE_SELECT_OGG);
   bool can_quit = false;
   menue_t menue;
 
-  char *items[4] = {
-      "start",
-      "options",
-      "about",
-      "exit"};
+  char **items = (char **)calloc(4, sizeof(char **));
+  items[0] = (char *)calloc(32, sizeof(char *));
+  items[1] = (char *)calloc(32, sizeof(char *));
+  items[2] = (char *)calloc(32, sizeof(char *));
+  items[3] = (char *)calloc(32, sizeof(char *));
+  strcpy(items[0], "start");
+  strcpy(items[1], "options");
+  strcpy(items[2], "about");
+  strcpy(items[3], "exit");
+
   menue.items = items;
   menue.count = 4;
   menue.selected = 0;
+
+  if (!mute_music)
+  {
+    Mix_PlayMusic(music_menue, -1);
+  }
 
   while (!can_quit)
   {
@@ -142,7 +171,11 @@ bool main_menue_start(engine_t *engine)
       {
         if (event.key.keysym.sym == SDLK_DOWN)
         {
-          Mix_PlayChannel(-1, sfx_item, 0);
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_item, 0);
+          }
+
           menue.selected++;
           if (menue.selected >= menue.count)
           {
@@ -151,7 +184,11 @@ bool main_menue_start(engine_t *engine)
         }
         if (event.key.keysym.sym == SDLK_UP)
         {
-          Mix_PlayChannel(-1, sfx_item, 0);
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_item, 0);
+          }
+
           menue.selected--;
           if (menue.selected < 0)
           {
@@ -160,18 +197,29 @@ bool main_menue_start(engine_t *engine)
         }
         if (event.key.keysym.sym == SDLK_RETURN)
         {
-          Mix_PlayChannel(-1, sfx_select, 0);
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_select, 0);
+          }
+
           if (menue.selected == 0)
           {
             can_quit = true;
+            Mix_HaltMusic();
           }
-          else if (menue.selected == menue.count - 1)
+          else if (menue.selected == 1)
           {
-            return false;
+            options_menue_start(engine);
           }
           else if (menue.selected == 2)
           {
             about_screen_start(engine);
+          }
+          else if (menue.selected == menue.count - 1)
+          {
+            Mix_HaltMusic();
+            SDL_Delay(500);
+            return false;
           }
         }
       }
@@ -181,8 +229,11 @@ bool main_menue_start(engine_t *engine)
     SDL_RenderPresent(engine->renderer);
   }
 
-  Mix_FreeChunk(sfx_item);
-  Mix_FreeChunk(sfx_select);
+  free(items[0]);
+  free(items[1]);
+  free(items[2]);
+  free(items[3]);
+  free(items);
   return true;
 }
 
@@ -231,8 +282,6 @@ bool about_screen_start(engine_t *engine)
 {
   bool can_quit = false;
   SDL_Event event;
-  Mix_Chunk *sfx_item = Mix_LoadWAV(MENUE_ITEM_OGG);
-  Mix_Chunk *sfx_select = Mix_LoadWAV(MENUE_SELECT_OGG);
 
   SDL_Color color = {150, 50, 50, 255};
   SDL_Rect text_rect = {10, 10, 0, 0};
@@ -248,6 +297,11 @@ bool about_screen_start(engine_t *engine)
       SDL_TEXTUREACCESS_TARGET,
       WINDOW_WIDTH,
       WINDOW_HEIGHT);
+
+  SDL_SetRenderTarget(engine->renderer, render_texture);
+  SDL_SetRenderDrawColor(engine->renderer, 10, 10, 10, SDL_ALPHA_OPAQUE);
+  SDL_RenderClear(engine->renderer);
+  SDL_SetRenderTarget(engine->renderer, NULL);
 
   while (!can_quit)
   {
@@ -277,11 +331,11 @@ bool about_screen_start(engine_t *engine)
 
       if (about_screen_text[idx] != ' ')
       {
-        Mix_PlayChannel(-1, sfx_select, 0);
+        if (!mute_sfx)
+        {
+          Mix_PlayChannel(-1, sfx_select, 0);
+        }
       }
-
-      SDL_SetRenderDrawColor(engine->renderer, 10, 10, 10, SDL_ALPHA_OPAQUE);
-      SDL_RenderClear(engine->renderer);
 
       SDL_Surface *surface = TTF_RenderText_Solid(
           engine->font,
@@ -313,14 +367,223 @@ bool about_screen_start(engine_t *engine)
     SDL_RenderPresent(engine->renderer);
   }
 
-  Mix_FreeChunk(sfx_item);
-  Mix_FreeChunk(sfx_select);
+  SDL_SetRenderTarget(engine->renderer, render_texture);
+  SDL_SetRenderDrawColor(engine->renderer, 10, 10, 10, SDL_ALPHA_OPAQUE);
+  SDL_RenderClear(engine->renderer);
+  SDL_SetRenderTarget(engine->renderer, NULL);
+  SDL_RenderPresent(engine->renderer);
   SDL_DestroyTexture(render_texture);
   if (string)
   {
     free(string);
   }
   return true;
+}
+
+//==============================================================================
+
+bool options_menue_start(engine_t *engine)
+{
+  SDL_Event event;
+  bool can_quit = false;
+  menue_t menue;
+
+  char **items = (char **)calloc(5, sizeof(char **));
+  items[0] = (char *)calloc(64, sizeof(char *));
+  items[1] = (char *)calloc(64, sizeof(char *));
+  items[2] = (char *)calloc(64, sizeof(char *));
+  items[3] = (char *)calloc(64, sizeof(char *));
+  items[4] = (char *)calloc(64, sizeof(char *));
+
+  if (can_show_grids)
+  {
+    strcpy(items[0], "draw grids: yes");
+  }
+  else
+  {
+    strcpy(items[0], "draw grids: no");
+  }
+
+  if (is_fullscreen)
+  {
+    strcpy(items[1], "fullscreen: yes");
+  }
+  else
+  {
+    strcpy(items[1], "fullscreen: no");
+  }
+
+  if (mute_music)
+  {
+    strcpy(items[2], "mute music: yes");
+  }
+  else
+  {
+    strcpy(items[2], "mute music: no");
+  }
+
+  if (mute_sfx)
+  {
+    strcpy(items[3], "mute sfx: yes");
+  }
+  else
+  {
+    strcpy(items[3], "mute sfx: no");
+  }
+
+  strcpy(items[4], "back");
+
+  menue.items = items;
+  menue.count = 5;
+  menue.selected = 0;
+
+  while (!can_quit)
+  {
+    while (SDL_PollEvent(&event))
+    {
+      if (event.type == SDL_KEYDOWN)
+      {
+        if (event.key.keysym.sym == SDLK_DOWN)
+        {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_item, 0);
+          }
+
+          menue.selected++;
+          if (menue.selected >= menue.count)
+          {
+            menue.selected = 0;
+          }
+        }
+        if (event.key.keysym.sym == SDLK_UP)
+        {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_item, 0);
+          }
+          menue.selected--;
+          if (menue.selected < 0)
+          {
+            menue.selected = menue.count - 1;
+          }
+        }
+        if (event.key.keysym.sym == SDLK_RETURN)
+        {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_select, 0);
+          }
+          if (menue.selected == 0)
+          {
+            can_show_grids = !can_show_grids;
+            if (can_show_grids)
+            {
+              strcpy(items[0], "draw grids: yes");
+            }
+            else
+            {
+              strcpy(items[0], "draw grids: no");
+            }
+          }
+          else if (menue.selected == 1)
+          {
+            is_fullscreen = !is_fullscreen;
+            if (is_fullscreen)
+            {
+              strcpy(items[1], "fullscreen: yes");
+              SDL_SetWindowFullscreen(engine->window, SDL_WINDOW_FULLSCREEN);
+            }
+            else
+            {
+              strcpy(items[1], "fullscreen: no");
+              SDL_SetWindowFullscreen(engine->window, 0);
+            }
+          }
+          else if (menue.selected == 2)
+          {
+            mute_music = !mute_music;
+            if (mute_music)
+            {
+              strcpy(items[2], "mute music: yes");
+              Mix_HaltMusic();
+            }
+            else
+            {
+              strcpy(items[2], "mute music: no");
+              Mix_PlayMusic(music_menue, -1);
+            }
+          }
+          else if (menue.selected == 3)
+          {
+            mute_sfx = !mute_sfx;
+            if (mute_sfx)
+            {
+              strcpy(items[3], "mute sfx: yes");
+            }
+            else
+            {
+              strcpy(items[3], "mute sfx: no");
+            }
+          }
+          else if (menue.selected == 4)
+          {
+            can_quit = true;
+          }
+        }
+      }
+    }
+
+    draw_options_menue(engine, &menue);
+    SDL_RenderPresent(engine->renderer);
+  }
+
+  free(items[0]);
+  free(items[1]);
+  free(items[2]);
+  free(items[3]);
+  free(items[4]);
+  free(items);
+
+  return true;
+}
+
+//==============================================================================
+void draw_options_menue(engine_t *engine, menue_t *menue)
+{
+  SDL_SetRenderDrawColor(engine->renderer, 10, 10, 10, SDL_ALPHA_OPAQUE);
+  SDL_RenderClear(engine->renderer);
+
+  int x = 70, y = 120, w, h;
+  SDL_Color selected_fg = {255, 255, 255, 255};
+  SDL_Color not_selected_fg = {150, 50, 50, 255};
+  SDL_Color *ptr_color = &not_selected_fg;
+
+  for (uint8_t idx = 0; idx < menue->count; idx++)
+  {
+    if (idx == menue->selected)
+    {
+      ptr_color = &selected_fg;
+    }
+    else
+    {
+      ptr_color = &not_selected_fg;
+    }
+
+    SDL_Surface *surface = TTF_RenderText_Solid(
+        engine->font,
+        menue->items[idx],
+        *ptr_color);
+    TTF_SizeText(engine->font, menue->items[idx], &w, &h);
+    SDL_Rect rect = {x, y, w, h};
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(
+        engine->renderer,
+        surface);
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(engine->renderer, texture, NULL, &rect);
+    SDL_DestroyTexture(texture);
+    y += 10;
+  }
 }
 
 //==============================================================================
@@ -338,8 +601,19 @@ void game_start(engine_t *engine)
   int new_tick = old_tick;
   int dur_tick = 0;
   int sec_tick = 0;
+  Mix_Chunk *sfx_shoot = Mix_LoadWAV(OBJECT_SHOOT_OGG);
+  Mix_Chunk *sfx_move = Mix_LoadWAV(OBJECT_MOVE_OGG);
+  Mix_Chunk *sfx_rotate = Mix_LoadWAV(OBJECT_ROTATE_OGG);
+
   shape_t shape;
   generate_shape(&shape);
+
+  memset(board, 0, sizeof(board));
+
+  if (!mute_music)
+  {
+    Mix_PlayMusic(music_one, -1);
+  }
 
 reset_point:
   while (!can_quit && !is_game_over)
@@ -355,6 +629,11 @@ reset_point:
         }
         if (event.key.keysym.sym == SDLK_RIGHT)
         {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_move, 0);
+          }
+
           shape.pos.col++;
           if (can_collide(&shape, &is_game_over))
           {
@@ -363,6 +642,11 @@ reset_point:
         }
         if (event.key.keysym.sym == SDLK_LEFT)
         {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_move, 0);
+          }
+
           shape.pos.col--;
           if (can_collide(&shape, &is_game_over))
           {
@@ -371,6 +655,11 @@ reset_point:
         }
         if (event.key.keysym.sym == SDLK_DOWN)
         {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_move, 0);
+          }
+
           shape.pos.row++;
           if (can_collide(&shape, &is_game_over))
           {
@@ -380,6 +669,11 @@ reset_point:
         }
         if (event.key.keysym.sym == SDLK_UP)
         {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_rotate, 0);
+          }
+
           dir_k old_dir = shape.dir;
 
           shape.dir += 1;
@@ -395,6 +689,11 @@ reset_point:
         }
         if (event.key.keysym.sym == SDLK_RETURN)
         {
+          if (!mute_sfx)
+          {
+            Mix_PlayChannel(-1, sfx_shoot, 0);
+          }
+
           if (fast_land_shape(&shape, &is_game_over))
           {
             shape.pos.row--;
@@ -471,35 +770,69 @@ reset_point:
     memset(board, CELL_MPT, sizeof(board));
     goto reset_point;
   }
+
+  Mix_HaltMusic();
+
+  Mix_FreeChunk(sfx_shoot);
+  Mix_FreeChunk(sfx_move);
+  Mix_FreeChunk(sfx_rotate);
 }
 
 //==============================================================================
 
 void draw_board(SDL_Renderer *renderer)
 {
-  SDL_SetRenderDrawColor(renderer, 155, 155, 155, SDL_ALPHA_OPAQUE);
+  SDL_Rect rect_big = {
+      BOARD_WIDTH_SP,
+      BOARD_HEIGHT_SP,
+      BLOCK_SIZE * BOARD_COLS,
+      BLOCK_SIZE * BOARD_ROWS};
+  SDL_Rect rect = {
+      BOARD_WIDTH_SP,
+      BOARD_HEIGHT_SP,
+      BLOCK_SIZE,
+      BLOCK_SIZE};
 
-  SDL_Rect rect = {BOARD_WIDTH_SP, BOARD_HEIGHT_SP, BLOCK_SIZE, BLOCK_SIZE};
+  if (can_show_grids)
+  {
+    SDL_SetRenderDrawColor(renderer, 155, 155, 155, SDL_ALPHA_OPAQUE);
+    for (int col = 0, step = 0; col < BOARD_COLS; col++, step += BLOCK_SIZE)
+    {
+      SDL_RenderDrawLine(
+          renderer,
+          BOARD_WIDTH_SP + step,
+          BOARD_HEIGHT_SP,
+          BOARD_WIDTH_SP + step,
+          BOARD_HEIGHT_EP - 1);
+    }
+    for (int row = 0, step = 0; row < BOARD_ROWS; row++, step += BLOCK_SIZE)
+    {
+      SDL_RenderDrawLine(
+          renderer,
+          BOARD_WIDTH_SP,
+          BOARD_HEIGHT_SP + step,
+          BOARD_WIDTH_EP - 1,
+          BOARD_HEIGHT_SP + step);
+    }
+  }
+
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+  SDL_RenderDrawRect(renderer, &rect_big);
+
   for (int col = 0; col < BOARD_COLS; col++)
   {
     for (int row = 0; row < BOARD_ROWS; row++)
     {
       if (board[col][row] == CELL_OCP)
       {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_RenderFillRect(renderer, &rect);
       }
       else if (board[col][row] == CELL_TMP)
       {
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawRect(renderer, &rect);
-      }
-      else
-      {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawRect(renderer, &rect);
       }
-
       rect.y += BLOCK_SIZE;
     }
     rect.x += BLOCK_SIZE;

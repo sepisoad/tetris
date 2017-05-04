@@ -26,6 +26,11 @@
 #define INTRO_OGG "data/intro.ogg"
 #define MENUE_ITEM_OGG "data/menue_item.ogg"
 #define MENUE_SELECT_OGG "data/menue-select.ogg"
+#define OBJECT_SHOOT_OGG "data/object-shoot.ogg"
+#define OBJECT_MOVE_OGG "data/object-move.ogg"
+#define OBJECT_ROTATE_OGG "data/object-rotate.ogg"
+#define MUSIC_ONE_OGG "data/music-one.ogg"
+#define MUSIC_MENUE_OGG "data/manue-music.ogg"
 
 //==============================================================================
 
@@ -41,7 +46,6 @@ enum cell_k
   CELL_MPT = 0, // empty cell
   CELL_TMP = 1, // temporary occupied cell by current shape
   CELL_OCP = 2, // fully occupied cell after setteling a shape
-  // CELL_HDN = 3  // when a cell is out of board area and not visible
 };
 
 //==============================================================================
@@ -115,8 +119,10 @@ void engine_init(engine_t *engine);
 void engine_uninit(engine_t *engine);
 void intro_start(engine_t *engine);
 bool main_menue_start(engine_t *engine);
-bool about_screen_start(engine_t *engine);
 void draw_main_menue(engine_t *engine, menue_t *menue);
+bool options_menue_start(engine_t *engine);
+void draw_options_menue(engine_t *engine, menue_t *menue);
+bool about_screen_start(engine_t *engine);
 void game_start(engine_t *engine);
 void draw_board(SDL_Renderer *renderer);
 void refresh_shape(shape_t *shape);

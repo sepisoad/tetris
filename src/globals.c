@@ -156,7 +156,7 @@ const unsigned char shapes[7][4][16] = {
 //==============================================================================
 
 const char *about_screen_text = "\
-tetrisk version 0.2\n\
+tetrisk version 1.0\n\
 developed by `Sepehr Aryani`\n\
 tetrisk is an Tetris(tm) clone\n\
 \n\

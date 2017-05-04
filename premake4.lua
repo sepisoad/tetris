@@ -3,7 +3,8 @@ solution "test"
 
   project "game"
     language "C"
-    kind "ConsoleApp"
+    -- kind "ConsoleApp"
+    kind "WindowedApp"
     files { "src/**.c" }
     -- buildoptions { "-Werror" }
     if os.get() == "windows" then

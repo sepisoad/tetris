@@ -8,7 +8,11 @@
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include"
+                ]
             }
         },
         {
@@ -19,7 +23,11 @@
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
+                "databaseFilename": "",
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include"
+                ]
             }
         },
         {
@@ -32,7 +40,13 @@
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
+                "databaseFilename": "",
+                "path": [
+                    "C:/Users/sepisoad/Downloads/apps/msys32/mingw32/include",
+                    "C:/Users/sepisoad/Downloads/apps/msys32/mingw32/i686-w64-mingw32/include",
+                    "C:/Users/sepisoad/Downloads/_apps_/msys64/mingw64/include",
+                    "C:/Users/sepisoad/Downloads/_apps_/msys64/mingw64/x86_64-w64-mingw32/include"
+                ]
             }
         }
     ]
