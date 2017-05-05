@@ -21,6 +21,7 @@
 #define SHAPE_SCORE (CELL_SCORE * 4)
 #define ROW_SCORE (BOARD_COLS * CELL_SCORE)
 
+#define LOGO_PNG "data/logo.png"
 #define INTRO_SHEET "data/intro.png"
 #define INTRO_JSON "data/intro.json"
 #define INTRO_OGG "data/intro.ogg"
@@ -29,8 +30,8 @@
 #define OBJECT_SHOOT_OGG "data/object-shoot.ogg"
 #define OBJECT_MOVE_OGG "data/object-move.ogg"
 #define OBJECT_ROTATE_OGG "data/object-rotate.ogg"
-#define MUSIC_ONE_OGG "data/music-one.ogg"
-#define MUSIC_MENUE_OGG "data/manue-music.ogg"
+#define MUSIC_GAME_OGG "data/music-game.ogg"
+#define MUSIC_MENUE_OGG "data/menue-music.ogg"
 
 //==============================================================================
 

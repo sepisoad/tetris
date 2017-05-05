@@ -1,7 +1,9 @@
 # tetris
 a tetris clone written in C using SDL2
 
-![alt text](screenshots/1.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")![alt text](screenshots/3.png "in game screenshot")
+![alt text](screenshots/1.png "in game screenshot")![alt text](screenshots/2.png "in game screenshot")
+![alt text](screenshots/3.png "in game screenshot")![alt text](screenshots/5.png "in game screenshot")
+<!-- ![alt text](screenshots/4.png "in game screenshot") -->
 
 ## Where to get the game
 if you want you can download the pre-build and packaged version on itch.io

@@ -163,7 +163,7 @@ tetrisk is an Tetris(tm) clone\n\
 this game is free software and\n\
 the source code is available\n\
 on github:\n\
-github.com/sepisoad/tetrisk\n\
+github.com/sepisoad/tetris\n\
 \n\
 you can contact me on:\n\
 twitter: @sepisoad\n\

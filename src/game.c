@@ -17,7 +17,7 @@ extern cell_k board[BOARD_COLS][BOARD_ROWS];
 
 static Mix_Music *music_intro = NULL;
 static Mix_Music *music_menue = NULL;
-static Mix_Music *music_one = NULL;
+static Mix_Music *music_game = NULL;
 static Mix_Chunk *sfx_item = NULL;
 static Mix_Chunk *sfx_select = NULL;
 static bool can_show_grids = true;
@@ -32,7 +32,7 @@ void engine_init(engine_t *engine)
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
   TTF_Init();
 
-  engine->window = SDL_CreateWindow("tets",
+  engine->window = SDL_CreateWindow("tetrisk",
                                     SDL_WINDOWPOS_UNDEFINED,
                                     SDL_WINDOWPOS_UNDEFINED,
                                     WINDOW_WIDTH,
@@ -52,7 +52,7 @@ void engine_init(engine_t *engine)
   engine->font = TTF_OpenFont("data/font.ttf", 16);
 
   music_intro = Mix_LoadMUS(INTRO_OGG);
-  music_one = Mix_LoadMUS(MUSIC_ONE_OGG);
+  music_game = Mix_LoadMUS(MUSIC_GAME_OGG);
   music_menue = Mix_LoadMUS(MUSIC_MENUE_OGG);
   sfx_item = Mix_LoadWAV(MENUE_ITEM_OGG);
   sfx_select = Mix_LoadWAV(MENUE_SELECT_OGG);
@@ -63,7 +63,7 @@ void engine_init(engine_t *engine)
 void engine_uninit(engine_t *engine)
 {
   Mix_FreeMusic(music_intro);
-  Mix_FreeMusic(music_one);
+  Mix_FreeMusic(music_game);
   Mix_FreeMusic(music_menue);
   Mix_FreeChunk(sfx_item);
   Mix_FreeChunk(sfx_select);
@@ -274,6 +274,16 @@ void draw_main_menue(engine_t *engine, menue_t *menue)
     SDL_DestroyTexture(texture);
     y += 10;
   }
+
+  SDL_Surface *surface_logo;
+  SDL_Texture *texture_logo;
+  surface_logo = IMG_Load(LOGO_PNG);
+  texture_logo = SDL_CreateTextureFromSurface(engine->renderer, surface_logo);
+  SDL_Rect rect = {83, 70, 87, 15};
+  SDL_RenderCopy(engine->renderer, texture_logo, NULL, &rect);
+
+  SDL_FreeSurface(surface_logo);
+  SDL_DestroyTexture(texture_logo);
 }
 
 //==============================================================================
@@ -612,7 +622,7 @@ void game_start(engine_t *engine)
 
   if (!mute_music)
   {
-    Mix_PlayMusic(music_one, -1);
+    Mix_PlayMusic(music_game, -1);
   }
 
 reset_point:

@@ -37,7 +37,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   engine_init(&engine);
-  // intro_start(&engine);
+  intro_start(&engine);
   while (main_menue_start(&engine))
   {
     game_start(&engine);
